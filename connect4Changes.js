@@ -4,6 +4,10 @@ class Game {
         this.WIDTH = WIDTH;
         this.currPlayer = 1;
         this.board = [];
+        this.makeBoard();
+        this.makeHtmlBoard();
+        this.gameOver = false;
+        
     }
 
     makeBoard() {
@@ -127,5 +131,7 @@ class Game {
         }
     }
 }
-
-new Game(6, 7);
+const startButton = document.getElementById("start");
+startButton.addEventListener("click", () => {
+    const newGame = new Game(6, 7);
+});
