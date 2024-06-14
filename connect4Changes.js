@@ -1,9 +1,10 @@
 class Game {
-    constructor(HEIGHT, WIDTH) {
+    constructor(HEIGHT, WIDTH, playerOne, playerTwo) {
         this.HEIGHT = HEIGHT;
         this.WIDTH = WIDTH;
-        this.currPlayer = 1;
-        this.board = [];
+        this.players = [playerOne, playerTwo];
+        this.currPlayer = playerOne; //changed so it keeps track of the current player object instead of number
+        //this.board = []; //moved to makeBoard method
         this.makeBoard();
         this.makeHtmlBoard();
         this.gameOver = false;
@@ -11,6 +12,7 @@ class Game {
     }
 
     makeBoard() {
+        this.board = [];
         for (let y = 0; y < this.HEIGHT; y++) {
           this.board.push(Array.from({ length: this.WIDTH }));
         }
@@ -18,7 +20,9 @@ class Game {
 
     makeHtmlBoard() {
         const board = document.getElementById('board');
-      
+        
+        board.innerHTML = ''; //added after viewing solution
+
         // make column tops (clickable area for adding a piece to that column)
         const top = document.createElement('tr');
         top.setAttribute('id', 'column-top');
@@ -49,7 +53,7 @@ class Game {
 
     findSpotForCol(x) {
         for (let y = this.HEIGHT - 1; y >= 0; y--) {
-          if (!board[y][x]) {
+          if (!this.board[y][x]) {
             return y;
           }
         }
@@ -59,7 +63,8 @@ class Game {
     placeInTable(y, x) {
         const piece = document.createElement('div');
         piece.classList.add('piece');
-        piece.classList.add(`p${this.currPlayer}`); //this line is different in the solution
+        piece.style.backgroundColor = this.currPlayer.color;
+        //piece.classList.add(`${this.currPlayer}`); //this line is completely taken out in the solution
         piece.style.top = -50 * (y + 2);
       
         const spot = document.getElementById(`${y}-${x}`);
@@ -68,6 +73,10 @@ class Game {
 
     endGame(msg) {
         alert(msg);
+        //added after viewing the solution:
+        const top = document.querySelector("#column-top");
+        top.removeEventListener("click", this.handleBoardClick);
+
     }
 
     handleClick(evt) {
@@ -86,7 +95,7 @@ class Game {
         
         // check for win
         if (this.checkForWin()) {
-          return this.endGame(`Player ${this.currPlayer} won!`);
+          return this.endGame(`${this.currPlayer.color} won!`);
         }
         
         // check for tie
@@ -95,7 +104,7 @@ class Game {
         }
           
         // switch players
-        this.currPlayer = this.currPlayer === 1 ? 2 : 1;
+        this.currPlayer = this.currPlayer === this.players[0] ? this.players[1] : this.players[0]; // this.playerOne ? this.playerTwo : this.playerOne;
     }
 
     checkForWin() {
@@ -107,15 +116,15 @@ class Game {
           return cells.every(
             ([y, x]) =>
               y >= 0 &&
-              y < HEIGHT &&
+              y < this.HEIGHT &&
               x >= 0 &&
-              x < WIDTH &&
-              board[y][x] === currPlayer
+              x < this.WIDTH &&
+              this.board[y][x] === this.currPlayer
           );
         }
       
-        for (let y = 0; y < HEIGHT; y++) {
-          for (let x = 0; x < WIDTH; x++) {
+        for (let y = 0; y < this.HEIGHT; y++) {
+          for (let x = 0; x < this.WIDTH; x++) {
             // get "check list" of 4 cells (starting here) for each of the different
             // ways to win
             const horiz = [[y, x], [y, x + 1], [y, x + 2], [y, x + 3]];
@@ -131,7 +140,20 @@ class Game {
         }
     }
 }
+
+class Player {
+    constructor(color) {
+        this.color = color;
+    }
+}
+
 const startButton = document.getElementById("start");
+let p1Color =  document.getElementById("playerOne").value;
+let p2Color =  document.getElementById("playerTwo").value;
+
+
 startButton.addEventListener("click", () => {
-    const newGame = new Game(6, 7);
+    let playerOne = new Player(p1Color);
+    let playerTwo = new Player(p2Color);
+    new Game(6, 7, playerOne, playerTwo);
 });
